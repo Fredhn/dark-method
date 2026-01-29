@@ -1,0 +1,9 @@
+---
+description: When a DARK-METHOD agent file is open, follow that agent and write to current project folder
+globs: dark-method/agents/*.agent.md
+alwaysApply: false
+---
+
+# DARK-METHOD agent context
+
+When working with `dark-method/agents/*.agent.md`: you are that agent. **Current project folder** = single line in `dark-method/.current-project` (project slug). All artifact paths are **projects/{currentProjectFolder}/filename.md**. Read the full agent file; follow Required Inputs, single artifact output, Approval Gate, Handoff. Do not mix other agents' responsibilities. If `.current-project` is missing, ask the user to run Onboarding first to create a project folder under **projects/**.

@@ -1,0 +1,18 @@
+---
+description: DARK-METHOD workflow; start from repo root, one agent at a time, approval gates, one folder per video project; run agents via slash commands
+alwaysApply: true
+---
+
+# DARK-METHOD (repository root)
+
+This repo uses **DARK-METHOD**. Open the **repository root** (dark.channel.maker).
+
+**Running agents:** Users can **start** DARK-METHOD with **/start-dark-method** (or **/run-onboarding**). Run each agent by **clicking or typing a slash command** in chat. Type `/` in the chat input to see DARK-METHOD commands (e.g. **/start-dark-method**, **/run-onboarding**, **/run-producer**, **/run-retention-editor**). After approving an artifact, the agent tells the user to run the next agent via the slash command; the user clicks or types that command instead of writing "Run the X agent". Do not proceed to the next agent until the user has approved the current artifact and has run the next command themselves.
+
+1. **Read** `dark-method/dark-method.system.md` for governing rules.
+2. **Current project folder:** Read `dark-method/.current-project` (one line = project slug). If missing or empty, the user must run **/run-onboarding** first. All artifact paths are **projects/{currentProjectFolder}/** (e.g. projects/my-first-video/).
+3. **First run / Onboarding:** When the user runs **/start-dark-method** or **/run-onboarding**, follow `dark-method/agents/onboarding.agent.md`. Onboarding asks first: **new project** or **existing project**? **New project:** creates **projects/{slug}/** (and channel-brief if Repeatable channel), writes slug to `dark-method/.current-project`. **Existing project:** lists folders in **projects/**; user selects one; writes selected slug to `dark-method/.current-project` (no new folder; user is creating a new video/episode for that project). Next: run Producer.
+4. **Later runs:** When the user runs a slash command (e.g. **/run-producer**, **/run-retention-editor**), open the corresponding file in `dark-method/agents/` and follow it. All agents read/write artifacts in **projects/{currentProjectFolder}/**, where currentProjectFolder is the value in `dark-method/.current-project`.
+5. After each approval, tell the user to run the next agent via the slash command (e.g. **/run-retention-editor**); do not run the next agent yourself.
+
+Workflow: Onboarding → Producer → Script Architect → Retention Editor → Voice Director → Visual Director → Editor → Audio Engineer → Packaging → Publishing. Commands: **/start-dark-method** (start), **/run-onboarding**, **/run-producer**, **/run-script-architect**, **/run-retention-editor**, **/run-voice-director**, **/run-visual-director**, **/run-editor**, **/run-audio-engineer**, **/run-packaging**, **/run-publishing**.

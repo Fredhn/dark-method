@@ -1,0 +1,19 @@
+---
+description: DARK-METHOD artifact files; each video project lives under projects/; only the designated agent writes each file
+globs: "projects/*/channel-brief.md", "projects/*/production-brief.md", "projects/*/script.md", "projects/*/visuals.md", "projects/*/audio.md", "projects/*/packaging.md", "projects/*/publish.md"
+alwaysApply: false
+---
+
+# DARK-METHOD artifacts (projects/{currentProjectFolder}/)
+
+Artifact files live in **projects/{project-name}/** (e.g. `projects/my-video-title/`). The current project slug is in `dark-method/.current-project`; artifact paths are **projects/{currentProjectFolder}/**.
+
+- `channel-brief.md` → Onboarding (only when scope = "Repeatable channel system"); holds **channel-level** info; do not re-ask in later agents
+- `production-brief.md` → Producer (full video brief when Single video; **Episode Brief** when channel-brief exists)
+- `script.md` → Script Architect, then Retention Editor, then Voice Director
+- `visuals.md` → Visual Director, then Editor
+- `audio.md` → Audio Engineer
+- `packaging.md` → Packaging
+- `publish.md` → Publishing
+
+When editing these files: act only as the agent for the current phase. Respect existing approved content. Do not re-ask inputs already in earlier artifacts. Resolve paths using **projects/{currentProjectFolder}/** where currentProjectFolder = value in `dark-method/.current-project`.

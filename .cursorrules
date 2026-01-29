@@ -1,0 +1,9 @@
+# DARK-METHOD (repository root)
+
+This repo follows DARK-METHOD (dark-method/dark-method.system.md). Open the repository root.
+
+- **Start** DARK-METHOD with **/start-dark-method** (or **/run-onboarding**). Run agents via **slash commands** in chat: type `/` and select e.g. **/start-dark-method**, **/run-producer**, **/run-retention-editor**. After approving an artifact, the user clicks or types the next command instead of writing "Run the X agent".
+- Current video project slug is in dark-method/.current-project (one line). All artifact paths are projects/{currentProjectFolder}/.
+- All agents read/write artifacts in projects/{currentProjectFolder}/ (one folder per video project under projects/). One agent at a time; wait for user approval, then the user runs the next slash command.
+
+Workflow: Onboarding → Producer → Script Architect → Retention Editor → Voice Director → Visual Director → Editor → Audio Engineer → Packaging → Publishing.

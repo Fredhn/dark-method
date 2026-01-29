@@ -1,0 +1,69 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# DARK-METHOD .gitignore
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Secrets & Credentials (NEVER commit)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# MCP config with API keys
+.cursor/mcp.json
+
+# Google OAuth client secrets (YouTube Uploader MCP)
+.cursor/client_secret.json
+.cursor/client_secret*.json
+client_secret*.json
+
+# Environment files
+.env
+.env.*
+*.env
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DARK-METHOD Runtime State
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Current project pointer (local to each environment)
+dark-method/.current-project
+
+# User project folders (contain user-specific video project data)
+projects/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Local Tools & Binaries
+# ─────────────────────────────────────────────────────────────────────────────
+
+# DaVinci Resolve MCP (local installation)
+davinci-resolve-mcp/
+
+# YouTube Uploader MCP binary
+tools/youtube-uploader-mcp/*.exe
+tools/youtube-uploader-mcp/*.dmg
+tools/youtube-uploader-mcp/*.AppImage
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IDE & OS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# VS Code / Cursor (keep .cursor/commands and .cursor/rules)
+.vscode/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Node / Python (if used)
+# ─────────────────────────────────────────────────────────────────────────────
+
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+tools/youtube-uploader-mcp/README.md
