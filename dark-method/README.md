@@ -40,8 +40,9 @@ Human user: **Approves**, **Executes manual steps**, **Publishes**.
    - **Existing project:** Onboarding lists the folders in **projects/** and you select one. No new folder is created; you are creating a **new video** (or new episode) for that project. Next: run Producer to create the Episode Brief (or Production Brief) for this video.
 3. **If new project and scope = "Repeatable channel system":** Onboarding also asks for **channel-level** inputs (channel name, positioning, default audience, default tone, format) and writes them to **channel-brief.md**. Each episode then gets its own **Episode Brief** (production-brief.md) from the Producer; channel-level info is not re-asked. See **Channel vs episode** below.
 4. **Researchable themes and suggested sources:** When the video is about a real-world topic (e.g. "first round of Brasileirao 2026"), the **Producer** can ask for **suggested sources for research** (e.g. official league site, trusted news); the **Script Architect** will also prompt for suggested sources before researching. Providing trusted URLs or publication names helps keep the script accurate and reliable—the agent prioritizes these when fetching data.
-5. Provide required inputs when asked; approve each artifact before moving to the next agent.
-6. Execute manual steps when indicated.
+5. **Replying to choices:** When the agent offers options (e.g. new vs existing project), it shows **1** and **2**; reply with **1** or **2** or type the option name. For "next step", type **/** and **click** the slash command (e.g. **/run-producer**).
+6. Provide required inputs when asked; approve each artifact before moving to the next agent.
+7. Execute manual steps when indicated.
 
 **Always start with agents/onboarding.agent.md.** Do not skip or reorder agents. Each project has its own folder under **projects/**; do not mix projects.
 

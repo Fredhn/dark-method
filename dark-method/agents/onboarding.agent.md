@@ -57,12 +57,14 @@ If any required input for the chosen path is missing, the agent MUST request it 
 
 ## Process
 
-1. **Ask first:** "Do you want to create a video for a **new project** or an **existing project**?"  
-   - ( ) New project  
-   - ( ) Existing project  
+1. **Ask first:** Present the choice in this UX-friendly format so the user can reply with a number or short phrase:  
+   **"Do you want to create a video for a new project or an existing project?"**  
+   - **1** — New project  
+   - **2** — Existing project  
+   Add: **"Reply with 1 or 2, or type the option name."** Accept "1", "new", "new project" as New project; "2", "existing", "existing project" as Existing project.  
 
-2. **If user chose "New project":**  
-   - Request and collect: project name/slug, scope, language, experience level.  
+2. **If user chose "New project" (1, new, or new project):**  
+   - Request and collect: project name/slug, scope, language, experience level. When asking **scope**, use the same UX format: **1** — Single video | **2** — Repeatable channel system, then "Reply with 1 or 2, or type the option name." When asking **experience level**, use **1** — Beginner | **2** — Intermediate | **3** — Advanced, then "Reply with 1, 2, or 3."  
    - **Create project folder (execute this step):**  
      - Create the **projects/** directory at repository root if it does not exist.  
      - Create a new folder at **projects/{slug}** (e.g. `projects/my-first-video`).  
@@ -72,9 +74,9 @@ If any required input for the chosen path is missing, the agent MUST request it 
      - Write the project slug (one line, no path) to **dark-method/.current-project**.  
    - Produce a short **Onboarding Summary** that: Restates DARK-METHOD and workflow order; states that artifacts live in **projects/{slug}/**; if Repeatable channel, states channel-level info is in channel-brief.md and each episode gets its own Episode Brief; if Single video, states the single video brief and artifacts live there; tailors to experience level.  
 
-3. **If user chose "Existing project":**  
+3. **If user chose "Existing project" (2, existing, or existing project):**  
    - **List available projects:** Read the **projects/** directory at repository root. List all subfolder names (each subfolder is one project). If **projects/** does not exist or has no subfolders, tell the user "There are no existing projects. Please choose **New project** to create one." and return to step 1.  
-   - **Present the list** to the user (e.g. "Available projects: 1. brasileirao-2026-rodadas-animadas, 2. my-channel. Which project do you want to use for this new video? (enter number or project name/slug)").  
+   - **Present the list** in the same UX-friendly format: number each project (**1**, **2**, …), then add **"Reply with the number or the project name/slug."**  
    - **User selects** one project (by number or by name/slug). Resolve to the project slug (folder name).  
    - Write the selected project slug (one line, no path) to **dark-method/.current-project**. Do **not** create a new folder. Do **not** ask scope, language, or experience level.  
    - Produce a short **Onboarding Summary** that: Restates DARK-METHOD and workflow order; states "You are creating a **new video** (or new episode) for project **{slug}**. Artifacts for this video will live in **projects/{slug}/**. Run Producer next to create the Episode Brief (or Production Brief) for this video."  

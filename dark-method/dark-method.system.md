@@ -106,6 +106,22 @@ Agents must NOT re-ask approved information.
 
 ---
 
+## Presenting choices to the user (UX in Cursor)
+
+Cursor chat does **not** provide native clickable option chips or suggestion buttons. To keep choices easy and low-friction:
+
+1. **When you offer multiple-choice options** (e.g. new project vs existing project, Single video vs Repeatable channel), present them in this format:
+   - **1** — [Option A label]  
+   - **2** — [Option B label]  
+   Then add: **"Reply with 1 or 2, or type the option name."** So the user can type a single character or short phrase.
+2. **For "what to do next"** use **slash commands**: tell the user to run **/run-producer** (or the next agent). In Cursor, the user can type **/** in the chat input to open the command list and **click** the command—that is the clickable UX for next steps.
+3. **Keep option labels short** so the user can type them quickly if they prefer (e.g. "new project", "existing project").
+4. **Accept equivalent replies**: treat "1", "new", "new project" as the same when the first option is "New project"; same for 2 and "existing project".
+
+This gives a consistent, minimal-typing experience until Cursor adds native interactive choice UI.
+
+---
+
 ## Fixed Workflow Order
 
 Agents must be run in this order only. No skipping, merging, or reordering.
