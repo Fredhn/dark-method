@@ -14,7 +14,22 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 ## MCP Integration (optional)
 
-**Web search / web fetch:** When the video theme is **researchable** (e.g. real events, league rounds, dates, statistics—like "first round of Brasileirao 2026"), the agent MUST use web search or web fetch to gather **current, accurate** data about the topic. Use Cursor's web search or MCP web fetch; cite sources. This data is aggregated into **research.md** (supporting artifact) and used to inform the script so the narration is factual and up-to-date.
+**Web search / web fetch:** When the video theme is **researchable** (e.g. real events, league rounds, dates, statistics—like "first round of Brasileirao 2026"), the agent MUST use web search or web fetch to gather **current, accurate** data about the topic. Use Cursor's web search or MCP web fetch. All gathered data MUST be written to **research.md** with **a source for every fact** (URL or publication name). The script may use **only** facts that appear in research.md with a source; see **Research safety and factual accuracy** below.
+
+---
+
+## Research safety and factual accuracy (mandatory when using web data)
+
+When the theme is researchable and you perform web research, you MUST follow these rules to avoid hallucination and keep the script safe to publish:
+
+1. **Only use what you actually fetched.** Do not mention any event, match, result, date, score, team name, or timeline in the script unless it appears **explicitly** in the content you retrieved from a web search or fetch. If you did not find it in a source, do not add it.
+2. **One source per fact in research.md.** In **research.md**, every fact or figure MUST be listed with its **source** (URL or publication name). Do not list facts without a source. Do not add to the script any fact that is not in research.md with a source.
+3. **No inference or extrapolation.** Do not infer results, dates, or "likely" events. Do not assume a match happened, a round was played, or a date is correct unless a retrieved source states it. If the source says "scheduled", "TBD", or "to be announced", do not state it as if it already occurred.
+4. **Uncertain = omit or qualify.** If a detail is unclear, conflicting across sources, or not confirmed, either **omit it from the script** or phrase it cautiously (e.g. "according to [source], …"). Prefer omitting over guessing.
+5. **Cross-check before finalizing.** Before writing the final script, verify: every claim (date, score, event, team, round number) that appears in the script is present in research.md and has a source. If you cannot trace a claim to research.md, remove it from the script.
+6. **Prefer official or authoritative sources.** When multiple sources conflict, prefer official league/organization sites, official calendars, or established news outlets. Note in research.md if something is "unconfirmed" or "from a single source".
+
+These rules ensure the user does not have to iterate to fix invented or wrong facts; the script stays safe and verifiable.
 
 ---
 
@@ -53,9 +68,9 @@ If the Production Brief is not approved or not present, the agent MUST request i
 
 - Line-by-line spoken narration  
 - No visual or pacing notes  
-- **When theme is researchable:** Script MUST incorporate real, fetched data (dates, results, stats) so the narration is accurate; do not invent facts.
+- **When theme is researchable:** Script may include **only** facts that appear in **research.md** with a source. Do not invent, infer, or assume any event, date, score, match, or timeline. If data was not found or is uncertain, omit it or qualify it; never state unverified facts as certain.
 
-**Supporting (when research was performed):** **research.md** — Written to **projects/{currentProjectFolder}/research.md**. Contains: theme/topic, date of research, key facts and figures used in the script, and sources (URLs or names). Enables verification and downstream consistency.  
+**Supporting (when research was performed):** **research.md** — Written to **projects/{currentProjectFolder}/research.md**. Must list **only** facts obtained from web search/fetch; **every fact must have a source** (URL or publication name). Structure: theme/topic, date of research, then each fact with its source. Enables verification and ensures the script stays safe.  
 
 ---
 
@@ -63,10 +78,12 @@ If the Production Brief is not approved or not present, the agent MUST request i
 
 1. Read **dark-method/.current-project** for the current project folder. If missing, request the user to run Onboarding first.  
 2. Read the approved Production Brief (or Episode Brief) from **projects/{currentProjectFolder}/production-brief.md**. If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone, voice, and format consistency.  
-3. **Theme research (when applicable):** If the brief's **theme, topic, or episode goal** is specific and researchable (e.g. real events, league rounds, tournaments, dates, statistics, current facts), use **web search or web fetch** to gather accurate, up-to-date information. Examples: "first round of Brasileirao 2026" → fetch match dates, teams, results or schedule; "World Cup 2026 groups" → fetch group composition and fixtures. Aggregate key facts, figures, and sources. Write **projects/{currentProjectFolder}/research.md** with: theme/topic, date of research, key facts and figures, and sources (URLs or publication names). If the theme is not researchable (e.g. purely fictional or abstract), skip this step and do not create research.md.  
+3. **Theme research (when applicable):** If the brief's **theme, topic, or episode goal** is specific and researchable (e.g. real events, league rounds, tournaments, dates, statistics, current facts), use **web search or web fetch** to gather information.  
+   - **Write research.md first.** Record **only** what you actually retrieved from sources. For **each** fact (date, match, result, team, round, statistic), write the **source** (URL or publication name) next to it. Do not add facts you inferred or assumed; if a result or date was not found, do not list it. If a source says "scheduled" or "TBD", note that explicitly; do not treat it as a past result.  
+   - Save to **projects/{currentProjectFolder}/research.md**: theme/topic, date of research, then facts with sources. If the theme is not researchable (e.g. purely fictional or abstract), skip this step and do not create research.md.  
 4. Use optional inputs only if provided.  
-5. Draft the narration script using the brief (and, when present, the gathered research). Incorporate real data into the script so the narration is factual; do not invent events, dates, or statistics. Write the script to **projects/{currentProjectFolder}/script.md**.  
-6. Present the script (and, if created, mention research.md and key sources) and run the approval gate.
+5. **Draft the narration script** using the brief and, when present, **only the facts listed in research.md with sources**. Do not mention any event, date, score, match, or timeline that is not in research.md with a source. If the data is incomplete (e.g. schedule not yet published), say so in the script or omit the detail; do not invent. Before finalizing, cross-check: every factual claim in the script must be traceable to research.md. Write the script to **projects/{currentProjectFolder}/script.md**.  
+6. Present the script (and, if created, mention research.md and that every fact is sourced) and run the approval gate.
 
 ---
 
