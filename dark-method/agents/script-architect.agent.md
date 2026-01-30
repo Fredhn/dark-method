@@ -12,9 +12,9 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 ---
 
-## MCP Integration
+## MCP Integration (optional)
 
-**None.** This agent produces narrative content only. No external MCP tools are required.
+**Web search / web fetch:** When the video theme is **researchable** (e.g. real events, league rounds, dates, statistics—like "first round of Brasileirao 2026"), the agent MUST use web search or web fetch to gather **current, accurate** data about the topic. Use Cursor's web search or MCP web fetch; cite sources. This data is aggregated into **research.md** (supporting artifact) and used to inform the script so the narration is factual and up-to-date.
 
 ---
 
@@ -47,12 +47,15 @@ If the Production Brief is not approved or not present, the agent MUST request i
 
 ---
 
-## Output (Single Artifact)
+## Output (Single Artifact + optional supporting)
 
-**Narration Script v1** — Written to **projects/{currentProjectFolder}/script.md** (current project folder = value in **dark-method/.current-project**). Must be:
+**Primary:** **Narration Script v1** — Written to **projects/{currentProjectFolder}/script.md** (current project folder = value in **dark-method/.current-project**). Must be:
 
 - Line-by-line spoken narration  
 - No visual or pacing notes  
+- **When theme is researchable:** Script MUST incorporate real, fetched data (dates, results, stats) so the narration is accurate; do not invent facts.
+
+**Supporting (when research was performed):** **research.md** — Written to **projects/{currentProjectFolder}/research.md**. Contains: theme/topic, date of research, key facts and figures used in the script, and sources (URLs or names). Enables verification and downstream consistency.  
 
 ---
 
@@ -60,9 +63,10 @@ If the Production Brief is not approved or not present, the agent MUST request i
 
 1. Read **dark-method/.current-project** for the current project folder. If missing, request the user to run Onboarding first.  
 2. Read the approved Production Brief (or Episode Brief) from **projects/{currentProjectFolder}/production-brief.md**. If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone, voice, and format consistency.  
-3. Use optional inputs only if provided.  
-4. Draft the narration script and write it to **projects/{currentProjectFolder}/script.md**.  
-5. Present the script and run the approval gate.
+3. **Theme research (when applicable):** If the brief's **theme, topic, or episode goal** is specific and researchable (e.g. real events, league rounds, tournaments, dates, statistics, current facts), use **web search or web fetch** to gather accurate, up-to-date information. Examples: "first round of Brasileirao 2026" → fetch match dates, teams, results or schedule; "World Cup 2026 groups" → fetch group composition and fixtures. Aggregate key facts, figures, and sources. Write **projects/{currentProjectFolder}/research.md** with: theme/topic, date of research, key facts and figures, and sources (URLs or publication names). If the theme is not researchable (e.g. purely fictional or abstract), skip this step and do not create research.md.  
+4. Use optional inputs only if provided.  
+5. Draft the narration script using the brief (and, when present, the gathered research). Incorporate real data into the script so the narration is factual; do not invent events, dates, or statistics. Write the script to **projects/{currentProjectFolder}/script.md**.  
+6. Present the script (and, if created, mention research.md and key sources) and run the approval gate.
 
 ---
 

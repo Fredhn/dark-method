@@ -32,7 +32,7 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 **When projects/{currentProjectFolder}/channel-brief.md does NOT exist (Single video):**
 
-1. **Core video idea or theme** — What the video is about.  
+1. **Core video idea or theme** — What the video is about. If the theme is a **researchable topic** (e.g. "first round of Brasileirao 2026", "World Cup 2026 groups"), state it clearly; the Script Architect will fetch real web data and use it in the script.  
 2. **Target video length** — Desired duration (e.g. 8–12 min).  
 3. **Desired tone** — e.g. neutral, dramatic, calm, ominous.  
 4. **Language** — Language for script and narration (from onboarding or restated here).
@@ -41,7 +41,7 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 - **Read channel-brief.md first.** Do not re-ask channel-level information (channel name, positioning, default audience, default tone, format).  
 - Request only **episode-level** inputs:  
-  1. **This episode/video goal or theme** — What this specific video/episode is about.  
+  1. **This episode/video goal or theme** — What this specific video/episode is about. If researchable (e.g. "round 1 of Brasileirao 2026"), state it clearly; the Script Architect will fetch real data for the script.  
   2. **This episode target length** — Desired duration for this episode (e.g. 8–12 min; may align with channel format).  
   3. **This episode tone** — Or "per channel" if using the channel default.  
   4. **Language** — If not already in channel brief (from onboarding or restated here).

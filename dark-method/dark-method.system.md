@@ -41,8 +41,8 @@ When the user selects **Repeatable channel system** at Onboarding, the framework
 
 ### Episode-level (video-specific; applies to this video only)
 
-- Stored in **production-brief.md** (Episode Brief when channel-brief exists), **script.md**, **visuals.md**, **audio.md**, **packaging.md**, **publish.md**.
-- **Episode-level** includes: this episode/video goal, this episode target length, this episode topic/theme, this episode tone (or "per channel"), and all script, visual, audio, packaging, and publish artifacts for this video.
+- Stored in **production-brief.md** (Episode Brief when channel-brief exists), **script.md**, **visuals.md**, **audio.md**, **packaging.md**, **publish.md**. Optionally **research.md** (created by Script Architect when the theme is researchable).
+- **Episode-level** includes: this episode/video goal, this episode target length, this episode topic/theme, this episode tone (or "per channel"), and all script, visual, audio, packaging, and publish artifacts for this video. When the theme is researchable (e.g. real events, league rounds), Script Architect fetches web data, writes **research.md** with facts and sources, and uses that data in the script.
 - When **channel-brief.md** exists: **production-brief.md** is the **Episode Brief** (references channel brief; contains episode goal, length, topic; inherits audience and default tone from channel brief). When **channel-brief.md** does not exist (Single video): **production-brief.md** is the full video brief.
 
 ### Behavior by scope

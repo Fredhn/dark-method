@@ -21,7 +21,7 @@ Human user: **Approves**, **Executes manual steps**, **Publishes**.
 
 1. **Onboarding Agent** — Consent and setup  
 2. **Producer Agent** — Production Brief  
-3. **Script Architect Agent** — Narration script  
+3. **Script Architect Agent** — Narration script (when the theme is researchable—e.g. "first round Brasileirao 2026"—fetches real web data and writes **research.md**; script uses that data)  
 4. **Retention Editor Agent** — Retention-optimized script  
 5. **Voice Director Agent** — Voice-directed script  
 6. **Visual Director Agent** — Visual blueprint (animation)  
@@ -39,8 +39,9 @@ Human user: **Approves**, **Executes manual steps**, **Publishes**.
    - **New project:** You provide project name/slug, scope (Single video / Repeatable channel system), language, experience level. Onboarding creates **projects/{slug}/** and, if Repeatable channel, **channel-brief.md** with channel-level inputs. All artifacts for that project go there.
    - **Existing project:** Onboarding lists the folders in **projects/** and you select one. No new folder is created; you are creating a **new video** (or new episode) for that project. Next: run Producer to create the Episode Brief (or Production Brief) for this video.
 3. **If new project and scope = "Repeatable channel system":** Onboarding also asks for **channel-level** inputs (channel name, positioning, default audience, default tone, format) and writes them to **channel-brief.md**. Each episode then gets its own **Episode Brief** (production-brief.md) from the Producer; channel-level info is not re-asked. See **Channel vs episode** below.
-4. Provide required inputs when asked; approve each artifact before moving to the next agent.
-5. Execute manual steps when indicated.
+4. **Researchable themes:** When you tell the Producer the video is about a real-world topic (e.g. "first round of Brasileirao 2026"), the Script Architect will **fetch real web data** (dates, results, stats) and write **research.md**; the script will use that data so the narration is accurate.
+5. Provide required inputs when asked; approve each artifact before moving to the next agent.
+6. Execute manual steps when indicated.
 
 **Always start with agents/onboarding.agent.md.** Do not skip or reorder agents. Each project has its own folder under **projects/**; do not mix projects.
 

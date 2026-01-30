@@ -56,7 +56,7 @@ If the script is not approved or not present, the agent MUST request it and **ST
 ## Process
 
 1. Read **dark-method/.current-project** for the current project folder. If missing, request the user to run Onboarding first.  
-2. Read the approved narration script from **projects/{currentProjectFolder}/script.md**. If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone and format consistency when optimizing hooks and pacing.  
+2. Read the approved narration script from **projects/{currentProjectFolder}/script.md**. If **projects/{currentProjectFolder}/research.md** exists, read it and preserve factual consistency (do not contradict key facts when editing). If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone and format consistency when optimizing hooks and pacing.  
 3. Use optional inputs only if provided.  
 4. Draft the retention-optimized script and write it to **projects/{currentProjectFolder}/script.md**.  
 5. Present the script and run the approval gate.
