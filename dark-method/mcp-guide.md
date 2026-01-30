@@ -79,13 +79,13 @@ Replace the path with your repo root. On Windows use forward slashes or escaped 
 | MCP | Best for | Notes |
 |-----|----------|--------|
 | **DALL·E / Azure OpenAI DALL·E 3** | Thumbnails, concept art | Text-to-image; configurable size, quality. Requires OpenAI or Azure API key. |
-| **Fal MCP** | FLUX, Stable Diffusion, MusicGen | Images, video, music. [GitHub](https://github.com/raveenb/fal-mcp-server) |
-| **Replicate MCP** | FLUX, SD, many models | Run Replicate models (images, video). [GitHub](https://github.com/deepfates/mcp-replicate) |
+| **Replicate MCP** | FLUX, SD, many models (primary) | Run Replicate models (images, video). Pay-per-use; no subscription. [GitHub](https://github.com/deepfates/mcp-replicate). Configure `REPLICATE_API_TOKEN` in `.cursor/mcp.json` (placeholder: `YOUR_REPLICATE_API_TOKEN`). |
+| **Fal MCP** | FLUX, SD, MusicGen (fallback) | Images, video, music when Replicate fails or is unpaid. [GitHub](https://github.com/raveenb/fal-mcp-server). Configure `FAL_KEY` (placeholder: `YOUR_FAL_KEY`). |
 | **Image Generation MCP (Replicate Flux)** | Quick image gen | Replicate Flux model. |
 | **Creatify MCP** | Video + TTS + avatars | Full video generation, not only images; see below. |
 
 **Use in DARK-METHOD:**  
-- **Visual Director:** “Generate concept art for scene 1 from the description in `visuals.md`.”  
+- **Visual Director (Replicate primary, Fal fallback):** “Generate concept art for scene 1 from the description in `visuals.md`.”  
 - **Packaging:** “Generate a thumbnail image from the chosen concept in `packaging.md` (1280x720).”
 
 ---
@@ -183,20 +183,20 @@ Add TTS, image, or YouTube servers as needed (see sections above). After configu
 
 ## Agent MCP authorization
 
-Agents that can use MCPs (Voice Director, Visual Director, Editor, Packaging, Publishing) **prompt for authorization** at the start of their Process:
+Agents that can use MCPs (Voice Director, Visual Director, Audio Engineer, Editor, Packaging, Publishing) **prompt for authorization in a separate step after you approve the artifact**:
 
-- They ask whether you have the relevant MCP configured (e.g. in `.cursor/mcp.json` or Settings > MCP).
-- They ask whether you authorize **automatic execution** of the MCP's activities (e.g. generate TTS, generate thumbnails, upload to YouTube).
-- If you say **yes** and the MCP is available, the agent may call the MCP to automate the manual step; if **no** (or MCP not configured), the agent provides **Manual Step** instructions as usual.
+- First, the agent presents only the **approval gate** (Approve as-is / Approve with adjustments / Not approved). No MCP question is mixed with that prompt.
+- After you approve (e.g. Approve as-is), the agent asks in a **new, separate message** whether you authorize automatic execution of the MCP's activities (e.g. generate TTS, generate thumbnails, upload to YouTube).
+- If you say **yes** and the MCP is available, the agent calls the MCP to automate the manual step; if **no** (or MCP not configured), the agent provides **Manual Step** instructions. Then handoff to the next agent.
 
-This keeps control with you and avoids running external tools without consent.
+This keeps the approval decision and the MCP authorization decision separate and avoids confusing context.
 
 ---
 
 ## Consistency with DARK-METHOD rules
 
 - **One agent at a time:** MCPs are tools the agent (or user) can call during that agent’s step; they do not replace the agent or skip the approval gate.  
-- **Approval gate:** Automating a manual step (e.g. TTS, upload) still requires the user to approve the agent’s output before moving to the next agent.  
+- **Approval gate:** Automating a manual step (e.g. TTS, upload) still requires the user to approve the agent’s output before moving to the next agent. For agents that both produce an artifact and can automate via MCP (Visual Director, Voice Director, Audio Engineer, Editor, Packaging, Publishing), the approval gate is presented **alone** first; MCP authorization is a **separate step** after approval, so the user is not asked to approve and authorize in the same prompt.  
 - **Single artifact:** Each agent still produces one primary artifact; MCPs help create or fill it (e.g. write files, generate audio).  
 - **State awareness:** When using the filesystem MCP, the AI must respect `dark-method/.current-project` and write only under `projects/{currentProjectFolder}/`.
 

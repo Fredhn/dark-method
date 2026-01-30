@@ -99,19 +99,7 @@ If the edit structure is not approved or not present, the agent MUST request it 
    - Ask for music style preference if not in brief.
    - Ask if SFX are needed and what types.
 
-3. **MCP Authorization:**
-   
-   Ask: *"The following audio MCPs are configured in this workspace:*
-   - *Fal-AI: Can generate background music from text descriptions*
-   - *ElevenLabs: Can generate sound effects from text descriptions*
-   
-   *Do you authorize me to:*
-   - *Generate background music using Fal-AI? (Yes/No)*
-   - *Generate sound effects using ElevenLabs? (Yes/No)*
-   
-   *If yes, I'll create audio files in `projects/{currentProjectFolder}/audio/`. If no, I'll provide the audio mix guide with specifications for manual creation."*
-   
-   Wait for user response.
+3. **Do not ask for MCP authorization yet.** MCP authorization is a **separate step** that happens only **after** the user has approved the audio mix guide (see step 8 and After Approval). This keeps the approval gate clear and avoids mixing "approve artifact" with "authorize music/SFX generation."
 
 4. **Draft the audio mix guide:**
    - Define volume targets:
@@ -124,7 +112,7 @@ If the edit structure is not approved or not present, the agent MUST request it 
    - Write music generation prompts.
    - Write to **projects/{currentProjectFolder}/audio.md**.
 
-5. **Generate music (if Fal-AI MCP authorized):**
+5. **Generate music:** Only when the user has **first approved the guide** and **then** authorized MCP in the separate step (see After Approval). When authorized:
    - Calculate duration needed based on video length.
    - Call `generate_music` via **fal-ai** MCP:
      ```
@@ -138,7 +126,7 @@ If the edit structure is not approved or not present, the agent MUST request it 
      ```
    - Save output to `projects/{currentProjectFolder}/audio/background-music.mp3`.
 
-6. **Generate SFX (if ElevenLabs MCP authorized):**
+6. **Generate SFX:** Only when the user has authorized ElevenLabs MCP in the separate step (see After Approval). When authorized:
    - For each specified SFX, call `text_to_sound_effects` via **elevenlabs** MCP:
      ```
      server: elevenlabs
@@ -151,10 +139,13 @@ If the edit structure is not approved or not present, the agent MUST request it 
      ```
    - Report generated SFX file paths.
 
-7. **If MCP NOT authorized:**
-   - Add **Manual Step** instructions (see below).
+7. **If MCP NOT authorized (user declined in the separate step):**
+   - Add **Manual Step** instructions (see below); do not generate music or SFX.
 
-8. **Present the artifact and run the approval gate.**
+8. **Present the artifact and run the approval gate only.**
+   - Show the audio mix guide (and any generated file paths if this was a revision pass).
+   - Present **only** the approval gate: the three options from dark-method.system.md (Approve as-is / Approve with adjustments / Not approved).
+   - **Do not** mention MCP or music/SFX generation in the same prompt as the approval gate. MCP authorization is a **separate step** after approval (see After Approval).
 
 ---
 
@@ -190,6 +181,8 @@ If the user does not authorize audio MCPs:
 
 ## Approval Gate
 
+Present this gate **alone** — do not combine it with any MCP or music/SFX authorization question.
+
 **Please review and choose:**  
 - [ ] Approve as-is  
 - [ ] Approve with adjustments (describe)  
@@ -201,6 +194,9 @@ If not approved: ask how to improve, revise, re-submit, and repeat the approval 
 
 ## After Approval
 
-1. Summarize what was approved (1–3 bullets). Include generated audio file paths if applicable.
-2. Tell the user they can run the next agent by **clicking or typing the command**: **/run-packaging** (in chat, type `/` and select **run-packaging**, or type `/run-packaging`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
-3. **STOP.**
+1. Summarize what was approved (1–3 bullets).
+2. **MCP music/SFX generation (separate step):** In a **new, separate message**, ask: *"Do you authorize me to generate background music (Fal-AI) and/or sound effects (ElevenLabs) via MCP and save to projects/{currentProjectFolder}/audio/? Reply 'yes' or 'authorize' for one or both; otherwise use the Manual Step in this agent."* Wait for the user's response.
+   - **If yes:** Run music and/or SFX generation (Process steps 5–6), report generated file paths, then go to step 3 below.
+   - **If no:** Remind about the Manual Step, then go to step 3 below.
+3. Tell the user they can run the next agent by **clicking or typing the command**: **/run-packaging** (in chat, type `/` and select **run-packaging**, or type `/run-packaging`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
+4. **STOP.**

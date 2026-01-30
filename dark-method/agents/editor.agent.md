@@ -103,16 +103,7 @@ If the visual blueprint is not approved or not present, the agent MUST request i
    - Ask which editing software the user prefers.
    - Collect frame rate and resolution if not in brief.
 
-3. **MCP Authorization (if user uses DaVinci Resolve):**
-   
-   Ask: *"Do you use DaVinci Resolve for editing? If yes, the DaVinci Resolve MCP is configured in this workspace. Do you authorize me to:*
-   - *Create a new Resolve project for this video*
-   - *Import media files (narration, assets) into the media pool*
-   - *Create a timeline and add clips in the order specified by the playbook*
-   
-   *If yes, make sure DaVinci Resolve is running and the MCP server is connected. If no, I'll provide manual assembly instructions."*
-   
-   Wait for user response.
+3. **Do not ask for MCP authorization yet.** MCP authorization is a **separate step** that happens only **after** the user has approved the editing playbook (see step 7 and After Approval). This keeps the approval gate clear and avoids mixing "approve artifact" with "authorize Resolve automation." Collect whether the user uses DaVinci Resolve (for Manual Step vs MCP path) but do not ask to authorize MCP until after approval.
 
 4. **Draft the editing playbook:**
    - Define timeline structure (tracks, sections).
@@ -121,7 +112,7 @@ If the visual blueprint is not approved or not present, the agent MUST request i
    - List media import order.
    - Append as "## Editing Playbook" section to **projects/{currentProjectFolder}/visuals.md**.
 
-5. **Automate timeline assembly (if MCP authorized):**
+5. **Automate timeline assembly:** Only when the user has **first approved the playbook** and **then** authorized MCP in the separate step (see After Approval). When authorized:
    
    **Step 5a: Create or open project:**
    ```
@@ -170,10 +161,13 @@ If the visual blueprint is not approved or not present, the agent MUST request i
    
    Report project creation status.
 
-6. **If MCP NOT authorized or user doesn't use Resolve:**
-   - Add **Manual Step** instructions (see below).
+6. **If MCP NOT authorized (user declined in the separate step) or user doesn't use Resolve:**
+   - Add **Manual Step** instructions (see below); do not automate timeline assembly.
 
-7. **Present the artifact and run the approval gate.**
+7. **Present the artifact and run the approval gate only.**
+   - Show the editing playbook (and Resolve project name if this was a revision pass with MCP).
+   - Present **only** the approval gate: the three options from dark-method.system.md (Approve as-is / Approve with adjustments / Not approved).
+   - **Do not** mention MCP or Resolve automation in the same prompt as the approval gate. MCP authorization is a **separate step** after approval (see After Approval).
 
 ---
 
@@ -213,6 +207,8 @@ If the user does not authorize DaVinci Resolve MCP or uses different software:
 
 ## Approval Gate
 
+Present this gate **alone** — do not combine it with any MCP or Resolve authorization question.
+
 **Please review and choose:**  
 - [ ] Approve as-is  
 - [ ] Approve with adjustments (describe)  
@@ -224,6 +220,9 @@ If not approved: ask how to improve, revise, re-submit, and repeat the approval 
 
 ## After Approval
 
-1. Summarize what was approved (1–3 bullets). Include Resolve project name if created.
-2. Tell the user they can run the next agent by **clicking or typing the command**: **/run-audio-engineer** (in chat, type `/` and select **run-audio-engineer**, or type `/run-audio-engineer`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
-3. **STOP.**
+1. Summarize what was approved (1–3 bullets).
+2. **MCP Resolve automation (separate step):** Only if user uses DaVinci Resolve. In a **new, separate message**, ask: *"Do you authorize me to automate timeline assembly via DaVinci Resolve MCP (create project, import media, create timeline, add clips)? Reply 'yes' or 'authorize' to run; otherwise use the Manual Step in this agent. Ensure DaVinci Resolve is running and the MCP server is connected."* Wait for the user's response.
+   - **If yes:** Run timeline assembly (Process step 5), report project name and status, then go to step 3 below.
+   - **If no:** Remind about the Manual Step, then go to step 3 below.
+3. Tell the user they can run the next agent by **clicking or typing the command**: **/run-audio-engineer** (in chat, type `/` and select **run-audio-engineer**, or type `/run-audio-engineer`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
+4. **STOP.**

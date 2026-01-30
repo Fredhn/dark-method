@@ -97,15 +97,7 @@ If the video concept is not clear from approved artifacts, the agent MUST reques
    - Ask for risk tolerance if not clear.
    - Ask for branding constraints if channel-brief doesn't specify.
 
-3. **MCP Authorization:**
-   
-   Ask: *"The Fal-AI MCP is configured in this workspace. Do you authorize me to:*
-   - *Generate 2–3 thumbnail images from the packaging concepts*
-   - *Save them to `projects/{currentProjectFolder}/` as `thumbnail-{N}.png`*
-   
-   *If yes, I'll create the images automatically. If no, I'll provide detailed prompts you can use manually."*
-   
-   Wait for user response.
+3. **Do not ask for MCP authorization yet.** MCP authorization is a **separate step** that happens only **after** the user has approved the packaging kit (see step 7 and After Approval). This keeps the approval gate clear and avoids mixing "approve artifact" with "authorize thumbnail generation."
 
 4. **Draft the packaging kit:**
    - Write 3–5 title options:
@@ -119,7 +111,7 @@ If the video concept is not clear from approved artifacts, the agent MUST reques
      - **Detailed image prompt** for generation
    - Write to **projects/{currentProjectFolder}/packaging.md**.
 
-5. **Generate thumbnail images (if MCP authorized):**
+5. **Generate thumbnail images:** Only when the user has **first approved the packaging kit** and **then** authorized MCP in the separate step (see After Approval). When authorized:
    - For each thumbnail concept, call `generate_image` via **fal-ai** MCP:
      ```
      server: fal-ai
@@ -135,10 +127,13 @@ If the video concept is not clear from approved artifacts, the agent MUST reques
    - Save each to `projects/{currentProjectFolder}/thumbnail-{N}.png`.
    - If text overlay needed, note that user should add text manually (AI image generators struggle with text).
 
-6. **If MCP NOT authorized:**
-   - Add **Manual Step** instructions (see below).
+6. **If MCP NOT authorized (user declined in the separate step):**
+   - Add **Manual Step** instructions (see below); do not generate thumbnails.
 
-7. **Present the artifact (and generated thumbnail paths if applicable) and run the approval gate.**
+7. **Present the artifact and run the approval gate only.**
+   - Show the packaging kit (and any generated thumbnail paths if this was a revision pass).
+   - Present **only** the approval gate: the three options from dark-method.system.md (Approve as-is / Approve with adjustments / Not approved).
+   - **Do not** mention MCP or thumbnail generation in the same prompt as the approval gate. MCP authorization is a **separate step** after approval (see After Approval).
 
 ---
 
@@ -175,6 +170,8 @@ If the user does not authorize Fal-AI MCP:
 
 ## Approval Gate
 
+Present this gate **alone** — do not combine it with any MCP or thumbnail authorization question.
+
 **Please review and choose:**  
 - [ ] Approve as-is  
 - [ ] Approve with adjustments (describe)  
@@ -186,6 +183,9 @@ If not approved: ask how to improve, revise, re-submit, and repeat the approval 
 
 ## After Approval
 
-1. Summarize what was approved (1–3 bullets). Include generated thumbnail paths if applicable.
-2. Tell the user they can run the next agent by **clicking or typing the command**: **/run-publishing** (in chat, type `/` and select **run-publishing**, or type `/run-publishing`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
-3. **STOP.**
+1. Summarize what was approved (1–3 bullets).
+2. **MCP thumbnail generation (separate step):** In a **new, separate message**, ask: *"Do you authorize me to generate the thumbnail images via Fal-AI MCP and save them to projects/{currentProjectFolder}/ as thumbnail-{N}.png? Reply 'yes' or 'authorize' to generate; otherwise use the Manual Step in this agent."* Wait for the user's response.
+   - **If yes:** Run thumbnail generation (Process step 5), report generated file paths, then go to step 3 below.
+   - **If no:** Remind about the Manual Step, then go to step 3 below.
+3. Tell the user they can run the next agent by **clicking or typing the command**: **/run-publishing** (in chat, type `/` and select **run-publishing**, or type `/run-publishing`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
+4. **STOP.**

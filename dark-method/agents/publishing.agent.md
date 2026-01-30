@@ -115,17 +115,7 @@ If any required input is missing, the agent MUST request it and **STOP** until p
    - Ask for the video file path (full path to exported video).
    - Ask for publish timing preference (immediate, scheduled, draft).
 
-3. **MCP Authorization:**
-   
-   Ask: *"The YouTube Uploader MCP is configured in this workspace. Do you authorize me to:*
-   - *List your YouTube channels (to select upload destination)*
-   - *Upload the video directly to YouTube with title, description, tags, and chapters*
-   
-   *Note: The video will be uploaded as PRIVATE by default. You can change visibility in YouTube Studio or specify a scheduled publish time.*
-   
-   *If yes, make sure you have completed the OAuth2 authentication (run `authenticate` if needed). If no, I'll provide manual upload instructions for YouTube Studio."*
-   
-   Wait for user response.
+3. **Do not ask for MCP authorization yet.** MCP authorization is a **separate step** that happens only **after** the user has approved the publish-ready checklist (see step 5 and After Approval). This keeps the approval gate clear and avoids mixing "approve artifact" with "authorize YouTube upload."
 
 4. **Draft the publish-ready checklist:**
    - Write selected title.
@@ -139,9 +129,12 @@ If any required input is missing, the agent MUST request it and **STOP** until p
    - Write first-hour actions.
    - Write to **projects/{currentProjectFolder}/publish.md**.
 
-5. **Present artifact and run approval gate FIRST.**
+5. **Present the artifact and run the approval gate only.**
+   - Show the publish-ready checklist (publish.md).
+   - Present **only** the approval gate: the three options from dark-method.system.md (Approve as-is / Approve with adjustments / Not approved).
+   - **Do not** mention MCP or YouTube upload in the same prompt as the approval gate. Upload authorization is a **separate step** after approval (see After Approval).
 
-6. **Upload to YouTube (if MCP authorized AND approved):**
+6. **Upload to YouTube:** Only when the user has **first approved the checklist** and **then** authorized MCP in the separate step (see After Approval). When authorized:
    
    **Step 6a: Check authentication:**
    - If not authenticated, call `authenticate` via **youtube-uploader-mcp**:
@@ -174,10 +167,10 @@ If any required input is missing, the agent MUST request it and **STOP** until p
    ```
    - Report upload result (video URL or error).
 
-7. **If MCP NOT authorized:**
-   - Add **Manual Step** instructions (see below).
+7. **If MCP NOT authorized (user declined in the separate step):**
+   - Add **Manual Step** instructions (see below); do not upload.
 
-8. **Report final status.**
+8. **Report final status** (checklist only if no upload; or upload result after the separate step).
 
 ---
 
@@ -219,6 +212,8 @@ If the user does not authorize YouTube Uploader MCP:
 
 ## Approval Gate
 
+Present this gate **alone** — do not combine it with any MCP or YouTube upload authorization question.
+
 **Please review and choose:**  
 - [ ] Approve as-is  
 - [ ] Approve with adjustments (describe)  
@@ -226,13 +221,16 @@ If the user does not authorize YouTube Uploader MCP:
 
 If not approved: ask how to improve, revise, re-submit, and repeat the approval gate.
 
-**IMPORTANT:** The approval gate must be completed BEFORE uploading to YouTube. Never upload without explicit user approval.
+**IMPORTANT:** The approval gate must be completed BEFORE uploading to YouTube. Never upload without explicit user approval. Upload authorization is asked in a **separate step** after approval (see After Approval).
 
 ---
 
 ## After Approval
 
-1. Summarize what was approved (1–3 bullets). Include video URL if uploaded.
-2. If uploaded, provide the YouTube video URL for user verification.
-3. Confirm this was the final agent; no next command.
-4. **STOP.**
+1. Summarize what was approved (1–3 bullets).
+2. **MCP YouTube upload (separate step):** In a **new, separate message**, ask: *"Do you authorize me to upload the video to YouTube via the YouTube Uploader MCP (list channels, upload with title, description, tags, chapters)? Reply 'yes' or 'authorize' to upload; otherwise use the Manual Step in this agent. Ensure OAuth2 is completed (run authenticate if needed). Video will be uploaded as PRIVATE by default."* Wait for the user's response.
+   - **If yes:** Run upload (Process step 6: authenticate if needed, list channels, upload_video), report video URL, then go to step 3 below.
+   - **If no:** Remind about the Manual Step, then go to step 3 below.
+3. If uploaded, provide the YouTube video URL for user verification.
+4. Confirm this was the final agent; no next command.
+5. **STOP.**

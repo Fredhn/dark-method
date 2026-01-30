@@ -97,26 +97,16 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 2. **Collect voice inputs:**
    - Request voice type (AI or human) and optional inputs if not provided.
 
-3. **MCP Authorization (if voice type = AI):**
-   
-   Ask: *"The ElevenLabs MCP is configured in this workspace. Do you authorize me to:*
-   - *Search available voices to help you choose*
-   - *Generate TTS narration audio from the finalized script*
-   
-   *If yes, I'll use ElevenLabs to create `projects/{currentProjectFolder}/audio/narration.mp3`. If no, I'll provide manual TTS instructions instead."*
-   
-   Wait for user response.
+3. **Do not ask for MCP authorization yet.** MCP authorization is a **separate step** that happens only **after** the user has approved the voice-directed script (see step 8 and After Approval). This keeps the approval gate clear and avoids mixing "approve artifact" with "authorize TTS generation."
 
-4. **Voice selection (if MCP authorized):**
-   - Call `search_voices` via **elevenlabs** MCP to list available voices.
-   - Present voice options to user with descriptions.
-   - User selects a voice (by name or ID).
+4. **Voice preference (if voice type = AI):**
+   - Ask for a voice name if the user already knows one, or note "choose after approving the script." Do **not** call `search_voices` or any MCP before approval; MCP is used only after approval when the user authorizes TTS (see After Approval).
 
 5. **Draft the voice-directed script:**
    - Add emphasis markers, pause indicators, delivery notes.
    - Write to **projects/{currentProjectFolder}/script.md**.
 
-6. **Generate TTS audio (if MCP authorized):**
+6. **Generate TTS audio:** Only when the user has **first approved the script** and **then** authorized MCP in the separate step (see After Approval). When both are done:
    - Ensure **projects/{currentProjectFolder}/audio/** folder exists.
    - Call `text_to_speech` via **elevenlabs** MCP:
      ```
@@ -132,10 +122,13 @@ If any required input is missing, the agent MUST request it and **STOP** until p
      ```
    - Report the generated file path.
 
-7. **If MCP NOT authorized or voice type = human:**
-   - Add **Manual Step** instructions (see below).
+7. **If MCP NOT authorized (user declined in the separate step) or voice type = human:**
+   - Add **Manual Step** instructions (see below); do not generate TTS.
 
-8. **Present the artifact and run the approval gate.**
+8. **Present the artifact and run the approval gate only.**
+   - Show the voice-directed script (and any generated audio path if this was a revision pass).
+   - Present **only** the approval gate: the three options from dark-method.system.md (Approve as-is / Approve with adjustments / Not approved).
+   - **Do not** mention MCP or TTS generation in the same prompt as the approval gate. TTS authorization is a **separate step** after approval (see After Approval).
 
 ---
 
@@ -161,6 +154,8 @@ If the user does not authorize ElevenLabs MCP or chooses human voice:
 
 ## Approval Gate
 
+Present this gate **alone** — do not combine it with any MCP or TTS authorization question.
+
 **Please review and choose:**  
 - [ ] Approve as-is  
 - [ ] Approve with adjustments (describe)  
@@ -172,6 +167,9 @@ If not approved: ask how to improve, revise, re-submit, and repeat the approval 
 
 ## After Approval
 
-1. Summarize what was approved (1–3 bullets). Include audio file path if generated.
-2. Tell the user they can run the next agent by **clicking or typing the command**: **/run-visual-director** (in chat, type `/` and select **run-visual-director**, or type `/run-visual-director`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
-3. **STOP.**
+1. Summarize what was approved (1–3 bullets).
+2. **MCP TTS generation (separate step):** Only if voice type = AI. In a **new, separate message**, ask: *"Do you authorize me to generate the TTS narration via ElevenLabs MCP and save to projects/{currentProjectFolder}/audio/narration.mp3? Reply 'yes' or 'authorize' to generate; otherwise use the Manual Step in this agent. Ensure .cursor/mcp.json has your ElevenLabs API key."* Wait for the user's response.
+   - **If yes:** Call `search_voices` to list voices, present options, user selects; then run TTS generation (Process step 6), report the generated file path, then go to step 3 below.
+   - **If no:** Remind about the Manual Step, then go to step 3 below.
+3. Tell the user they can run the next agent by **clicking or typing the command**: **/run-visual-director** (in chat, type `/` and select **run-visual-director**, or type `/run-visual-director`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
+4. **STOP.**
