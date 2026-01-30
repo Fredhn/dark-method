@@ -28,8 +28,7 @@ When the theme is researchable and you perform web research, you MUST follow the
 4. **Uncertain = omit or qualify.** If a detail is unclear, conflicting across sources, or not confirmed, either **omit it from the script** or phrase it cautiously (e.g. "according to [source], …"). Prefer omitting over guessing.
 5. **Cross-check before finalizing.** Before writing the final script, verify: every claim (date, score, event, team, round number) that appears in the script is present in research.md and has a source. If you cannot trace a claim to research.md, remove it from the script.
 6. **Prefer official or authoritative sources.** When multiple sources conflict, prefer official league/organization sites, official calendars, or established news outlets. Note in research.md if something is "unconfirmed" or "from a single source".
-
-These rules ensure the user does not have to iterate to fix invented or wrong facts; the script stays safe and verifiable.
+7. **Prioritize user-suggested sources.** When the user (or the Production Brief) provides **suggested sources for research** (URLs or publication names), **prioritize** fetching from those first. Use other sources only to complement or when suggested sources do not contain the needed information. This keeps the script aligned with sources the user trusts.
 
 ---
 
@@ -59,6 +58,7 @@ If the Production Brief is not approved or not present, the agent MUST request i
 
 - Vocabulary level preference  
 - Structural preferences (acts, sections)  
+- **Suggested sources for research** — When the theme is researchable, the agent MUST prompt the user (see Process). The user may provide URLs or publication names here, or they may already be in the Production Brief under "Suggested sources for research". The agent prioritizes these when fetching data.  
 
 ---
 
@@ -77,13 +77,14 @@ If the Production Brief is not approved or not present, the agent MUST request i
 ## Process
 
 1. Read **dark-method/.current-project** for the current project folder. If missing, request the user to run Onboarding first.  
-2. Read the approved Production Brief (or Episode Brief) from **projects/{currentProjectFolder}/production-brief.md**. If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone, voice, and format consistency.  
-3. **Theme research (when applicable):** If the brief's **theme, topic, or episode goal** is specific and researchable (e.g. real events, league rounds, tournaments, dates, statistics, current facts), use **web search or web fetch** to gather information.  
+2. Read the approved Production Brief (or Episode Brief) from **projects/{currentProjectFolder}/production-brief.md**. If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for tone, voice, and format consistency. Note any **Suggested sources for research** in the brief.  
+3. **Suggested sources (when theme is researchable):** If the brief's **theme, topic, or episode goal** is specific and researchable (e.g. real events, league rounds, tournaments, dates, statistics), **ask the user** before researching: *"This video is about [theme]. To keep the script accurate and reliable, **do you have suggested sources** I should use for research? (e.g. official league/organization URLs, trusted news sites). If you provide URLs or publication names, I will prioritize them when gathering facts. You can also add or confirm sources now if they weren’t in the brief."* Wait for the user’s response. Use sources from the brief and any the user adds here; **prioritize** these when fetching. If the user provides none, proceed but prefer official or authoritative sources when searching.  
+4. **Theme research (when applicable):** If the theme is researchable, use **web search or web fetch** to gather information. **Prioritize user-suggested sources** (from the brief or from step 3); fetch from them first. Use other sources only to complement or when suggested sources do not contain the needed information.  
    - **Write research.md first.** Record **only** what you actually retrieved from sources. For **each** fact (date, match, result, team, round, statistic), write the **source** (URL or publication name) next to it. Do not add facts you inferred or assumed; if a result or date was not found, do not list it. If a source says "scheduled" or "TBD", note that explicitly; do not treat it as a past result.  
-   - Save to **projects/{currentProjectFolder}/research.md**: theme/topic, date of research, then facts with sources. If the theme is not researchable (e.g. purely fictional or abstract), skip this step and do not create research.md.  
-4. Use optional inputs only if provided.  
-5. **Draft the narration script** using the brief and, when present, **only the facts listed in research.md with sources**. Do not mention any event, date, score, match, or timeline that is not in research.md with a source. If the data is incomplete (e.g. schedule not yet published), say so in the script or omit the detail; do not invent. Before finalizing, cross-check: every factual claim in the script must be traceable to research.md. Write the script to **projects/{currentProjectFolder}/script.md**.  
-6. Present the script (and, if created, mention research.md and that every fact is sourced) and run the approval gate.
+   - Save to **projects/{currentProjectFolder}/research.md**: theme/topic, date of research, **sources used** (including user-suggested ones), then facts with sources. If the theme is not researchable (e.g. purely fictional or abstract), skip research and do not create research.md.  
+5. Use other optional inputs only if provided.  
+6. **Draft the narration script** using the brief and, when present, **only the facts listed in research.md with sources**. Do not mention any event, date, score, match, or timeline that is not in research.md with a source. If the data is incomplete (e.g. schedule not yet published), say so in the script or omit the detail; do not invent. Before finalizing, cross-check: every factual claim in the script must be traceable to research.md. Write the script to **projects/{currentProjectFolder}/script.md**.  
+7. Present the script (and, if created, mention research.md, sources used, and that every fact is sourced) and run the approval gate.
 
 ---
 

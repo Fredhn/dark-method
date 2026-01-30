@@ -54,15 +54,16 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 
 - Reference videos (links or descriptions)  
 - Monetization intent  
-- Audience assumptions (episode-specific overrides when channel-brief exists)
+- Audience assumptions (episode-specific overrides when channel-brief exists)  
+- **Suggested sources for research** — When the theme is researchable, ask: *"Do you have **suggested sources** the Script Architect should use when researching this topic? (e.g. official league/organization URLs, trusted news sites). Reliable sources are crucial for factual scripts."* If the user provides URLs or publication names, include them in the brief under **Suggested sources for research** so the Script Architect prioritizes them.
 
 ---
 
 ## Output (Single Artifact)
 
-**When channel-brief.md does NOT exist:** **Production Brief** (full video brief) — Written to **projects/{currentProjectFolder}/production-brief.md**. Must include: video goal, intended audience sophistication, emotional tone, length constraints, creative boundaries, success criteria.
+**When channel-brief.md does NOT exist:** **Production Brief** (full video brief) — Written to **projects/{currentProjectFolder}/production-brief.md**. Must include: video goal, intended audience sophistication, emotional tone, length constraints, creative boundaries, success criteria. **When the theme is researchable:** If the user provided suggested sources for research, include a **Suggested sources for research** section (URLs or publication names) so the Script Architect prioritizes them.
 
-**When channel-brief.md EXISTS:** **Episode Brief** — Written to **projects/{currentProjectFolder}/production-brief.md**. Must include: explicit reference to the channel brief (channel name, audience and default tone inherited); this episode goal; this episode length; this episode tone (or "per channel"); episode-specific creative boundaries and success criteria. Do not duplicate channel-level content; reference it.
+**When channel-brief.md EXISTS:** **Episode Brief** — Written to **projects/{currentProjectFolder}/production-brief.md**. Must include: explicit reference to the channel brief (channel name, audience and default tone inherited); this episode goal; this episode length; this episode tone (or "per channel"); episode-specific creative boundaries and success criteria. **When the theme is researchable:** If the user provided suggested sources, include **Suggested sources for research** in the brief. Do not duplicate channel-level content; reference it.
 
 ---
 
@@ -72,8 +73,9 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 2. **Check if projects/{currentProjectFolder}/channel-brief.md exists.**  
    - **If it exists:** Read channel-brief.md. Request only episode-level inputs (this episode goal, length, tone, language). Do not re-ask channel-level info. Draft the **Episode Brief** referencing the channel brief; write to **projects/{currentProjectFolder}/production-brief.md**.  
    - **If it does not exist:** Request full required inputs. Draft the **Production Brief** (full video brief); write to **projects/{currentProjectFolder}/production-brief.md**.  
-3. Use optional inputs only if provided.  
-4. Present the brief and run the approval gate.
+3. **When the theme is researchable:** Ask for **suggested sources for research** (optional): *"Do you have suggested sources the Script Architect should use when researching this topic? (e.g. official league site, trusted news). Reliable sources are crucial for an accurate script."* If provided, include them in the brief under **Suggested sources for research**.  
+4. Use other optional inputs only if provided.  
+5. Present the brief and run the approval gate.
 
 ---
 

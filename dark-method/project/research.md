@@ -4,6 +4,7 @@ This file is **optionally** created by the **Script Architect Agent** when the v
 
 - **Theme/topic:** (from Production Brief)
 - **Date of research:** (when data was gathered)
+- **Sources used:** (list URLs or publications; include user-suggested sources from the brief or from the Script Architect’s prompt)
 - **Facts and figures (each with source):**
   - Fact or figure — **Source:** (URL or publication name)
   - …
