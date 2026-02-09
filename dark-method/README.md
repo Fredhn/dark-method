@@ -62,6 +62,8 @@ When you select **Repeatable channel system** at Onboarding, the framework segre
 
 **MCPs (Model Context Protocol servers)** can assist agents and automate manual steps: filesystem (create project folders and artifact files), TTS (generate narration from the voice-directed script), image generation (thumbnails, concept art), YouTube (upload and metadata). See **dark-method/mcp-guide.md** for recommended MCPs by phase, config examples, and Cursor setup. Copy `.cursor/mcp.json.example` to `.cursor/mcp.json` and fill in paths and API keys.
 
+**Image generation workflow (framework default):** For scene images (Visual Director) and thumbnails (Packaging), agents use **Stability AI MCP first** (preferred), then Gemini (free tier), then Replicate, then Fal-AI. Configure Stability AI in `.cursor/mcp.json` with `STABILITY_AI_API_KEY` to use it as the primary image generator. **Centralized image output:** All image MCPs that write to disk (Stability AI, Gemini) use the same folder **`projects/_mcp_images`**; set `IMAGE_STORAGE_DIRECTORY` and `OUTPUT_IMAGE_PATH` to that path. Agents create this folder once before any image-MCP call to avoid ENOENT and wasted tokens.
+
 ---
 
 ## Using DARK-METHOD in Cursor (Repository Root)
@@ -77,7 +79,7 @@ When you select **Repeatable channel system** at Onboarding, the framework segre
    - **/run-retention-editor** — Retention-optimized script  
    - **/run-voice-director** — Voice-directed script  
    - **/run-visual-director** — Visual blueprint  
-   - **/run-editor** — Editing playbook  
+   - **/run-editor** — Editing playbook + DaVinci Resolve importable scripts (Fusion Scripts Comp per-video folder)  
    - **/run-audio-engineer** — Audio mix guide  
    - **/run-packaging** — Packaging kit  
    - **/run-publishing** — Publish-ready checklist  

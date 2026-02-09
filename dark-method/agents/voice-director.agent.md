@@ -16,33 +16,36 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 | MCP Server | Usage Level | Purpose |
 |------------|-------------|---------|
-| **elevenlabs** | **PREFERRED** | Generate high-quality TTS narration from the voice-directed script |
+| **coqui-tts** | **PREFERRED (free)** | Generate TTS narration locally with Coqui TTS — no API key or credits |
+| **elevenlabs** | Optional (paid) | High-quality TTS when user has credits and prefers ElevenLabs |
 
-### ElevenLabs MCP Tools
+Prefer **Coqui TTS** for TTS generation (free, local). Use **ElevenLabs** only when the user explicitly chooses it and has API credits.
+
+### Coqui TTS MCP Tools (preferred, free)
 
 | Tool | Description | When to Use |
 |------|-------------|-------------|
-| `search_voices` | Search available voices by name, description, or category | Use first to help user select a voice |
-| `text_to_speech` | Convert text to speech with chosen voice | Generate narration audio after script is finalized |
+| `list_models` | List available Coqui TTS models (optional `language_filter`) | Optional: help user pick a model by language |
+| `text_to_speech` | Convert text to speech and save as WAV | Generate narration after script is finalized |
 
-### Tool Parameters Reference
-
-**search_voices:**
-- `search` (optional): Search term to filter voices
-- `sort`: `name` or `created_at_unix`
-- `sort_direction`: `asc` or `desc`
-
-**text_to_speech:**
+**text_to_speech (Coqui):**
 - `text` (required): The narration text
-- `voice_name` (optional): Voice name (e.g. "Rachel", "Adam")
-- `voice_id` (optional): Voice ID if known
-- `output_directory` (required): Set to `projects/{currentProjectFolder}/audio/`
-- `language`: ISO 639-1 code (e.g. "en", "pt", "es")
-- `model_id`: Recommended `eleven_multilingual_v2` for multilingual or `eleven_flash_v2_5` for speed
-- `stability`: 0–1 (higher = more consistent, lower = more expressive)
-- `similarity_boost`: 0–1 (higher = closer to original voice)
-- `speed`: 0.7–1.2 (1.0 = normal)
-- `output_format`: Default `mp3_44100_128`
+- **Per-scene TTS (preferred):** Pass **`output_directory`** = **`{artifactBasePath}audio/`** and **`scene_number`** = **1** for the first scene, **2** for the second, **3** for the third, etc. The server then saves each call as `scene-01.wav`, `scene-02.wav`, … in that folder. **You must pass a different scene_number (1, 2, 3, …) for each call** so each file has a unique path.
+- Single file: use `output_path` (full path) or `output_directory` alone (saves as `narration.wav`).
+- `language`: ISO 639-1 code (e.g. "en", "pt", "pt-br")
+- `model_name` (optional): Coqui model from `list_models`; if omitted, a default for the language is used
+- `speaker_wav` (optional): Path to reference WAV for voice cloning (only with xtts_v2)
+
+### ElevenLabs MCP Tools (optional, paid)
+
+| Tool | Description | When to Use |
+|------|-------------|-------------|
+| `search_voices` | Search available voices by name, description, or category | Use when user chooses ElevenLabs |
+| `text_to_speech` | Convert text to speech with chosen voice | When user has credits and prefers ElevenLabs |
+
+**text_to_speech (ElevenLabs):**
+- `text` (required); for per-scene use a path parameter so each file is saved as `{artifactBasePath}audio/scene-01.wav`, etc.
+- `voice_name` or `voice_id`, `language`, `model_id` (e.g. `eleven_multilingual_v2`), `output_format`: `mp3_44100_128`
 
 ---
 
@@ -51,7 +54,7 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 - Define voice tone  
 - Define pacing and emphasis  
 - Prepare narration script for recording  
-- **Generate TTS audio** using ElevenLabs MCP when authorized
+- **Generate TTS audio** using Coqui TTS MCP (preferred, free) or ElevenLabs MCP when authorized
 
 ---
 
@@ -59,10 +62,19 @@ This agent follows all rules in **dark-method.system.md** (INPUT-FIRST, NO ASSUM
 
 Before producing the voice-directed script, the agent MUST receive:
 
-1. **Approved retention-optimized script** — From **projects/{currentProjectFolder}/script.md** (current project folder = value in **dark-method/.current-project**; output of Retention Editor).  
+1. **Approved retention-optimized script** — From the **episode script** at the artifact base path (see **Artifact base path** below; output of Retention Editor).  
 2. **Voice type** — AI or human.
 
 If any required input is missing, the agent MUST request it and **STOP** until provided.
+
+---
+
+## Artifact base path (episode-level paths)
+
+- Read **dark-method/.current-project** (one line = current project folder).
+- If **projects/{currentProjectFolder}/channel-brief.md** exists (Repeatable channel): read **dark-method/.current-video** (one line = video slug). Then **artifact base path** = **projects/{currentProjectFolder}/{currentVideoFolder}/**.
+- Else (Single video): **artifact base path** = **projects/{currentProjectFolder}/**.
+- All episode-level read/write (script, audio) use this base. Example: script = **{artifactBasePath}script.md**, audio folder = **{artifactBasePath}audio/**.
 
 ---
 
@@ -77,21 +89,22 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 
 ## Output (Single Artifact)
 
-**Voice-Directed Script** — Written to **projects/{currentProjectFolder}/script.md** (current project folder = value in **dark-method/.current-project**). Must include:
+**Voice-Directed Script** — Written to **{artifactBasePath}script.md**. Must include:
 
 - Emphasis markers  
 - Pause indicators  
 - Delivery notes  
 
-**If MCP authorized:** Also generates **projects/{currentProjectFolder}/audio/narration.mp3** (or equivalent).
+**If MCP authorized:** Generates **per-scene** TTS so the Editor can match image duration to actual narration length. Save one WAV per scene under **{artifactBasePath}audio/** as **scene-01.wav**, **scene-02.wav**, … **scene-N.wav**. For Coqui TTS, use **output_directory** = **{artifactBasePath}audio/** and **scene_number** = 1, 2, 3, … for each call (the MCP server builds the filename from scene_number so each call writes to a different file). Do **not** generate a single narration.wav when per-scene is used; the build script and Editor use the scene files for timing.
 
 ---
 
 ## Process
 
-1. **Read project context:**
+1. **Read project context and artifact base path:**
    - Read **dark-method/.current-project** for the current project folder. If missing, request the user to run Onboarding first.
-   - Read the approved retention-optimized script from **projects/{currentProjectFolder}/script.md**.
+   - Compute **artifact base path** (see **Artifact base path** above): if **projects/{currentProjectFolder}/channel-brief.md** exists, read **dark-method/.current-video** and set artifact base path = **projects/{currentProjectFolder}/{currentVideoFolder}/**; else **projects/{currentProjectFolder}/**.
+   - Read the approved retention-optimized script from **{artifactBasePath}script.md**.
    - If **projects/{currentProjectFolder}/channel-brief.md** exists, read it for default tone and voice consistency.
 
 2. **Collect voice inputs:**
@@ -104,23 +117,20 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 
 5. **Draft the voice-directed script:**
    - Add emphasis markers, pause indicators, delivery notes.
-   - Write to **projects/{currentProjectFolder}/script.md**.
+   - Write to **{artifactBasePath}script.md**.
 
-6. **Generate TTS audio:** Only when the user has **first approved the script** and **then** authorized MCP in the separate step (see After Approval). When both are done:
-   - Ensure **projects/{currentProjectFolder}/audio/** folder exists.
-   - Call `text_to_speech` via **elevenlabs** MCP:
-     ```
-     server: elevenlabs
-     tool: text_to_speech
-     arguments:
-       text: <full narration text from script>
-       voice_name: <selected voice>
-       output_directory: projects/{currentProjectFolder}/audio/
-       language: <from production brief>
-       model_id: eleven_multilingual_v2
-       output_format: mp3_44100_128
-     ```
-   - Report the generated file path.
+6. **Generate TTS audio (per-scene for correct image timing):** Only when the user has **first approved the script** and **then** authorized MCP in the separate step (see After Approval). When both are done:
+   - **Audio folder** = **{artifactBasePath}audio/** (artifact base path computed in step 1). Ensure this folder exists (create it if needed).
+   - **Split the script by scene:** Identify each section that starts with `###` (e.g. ### ABERTURA, ### ATLÉTICO-MG x PALMEIRAS, …). Extract only the narration lines for that section (strip direction notes like `[entrega: ...]` and optional emphasis markers for TTS). Count N sections (exclude "Manual Step" and any non-narration blocks).
+   - **Generate one WAV per scene** so the Editor and build script can use actual audio duration for each image.
+     - **Coqui TTS (preferred):** For each scene index i (1 to N), call `text_to_speech` with:
+       - `text`: that scene’s narration text only
+       - **`output_directory`**: **`{artifactBasePath}audio/`** (the audio folder; same for every call)
+       - **`scene_number`**: **i** (1 for first scene, 2 for second, 3 for third, …). The MCP server saves the file as `scene-01.wav`, `scene-02.wav`, etc. in that folder. **You must pass a different scene_number for each call.**
+       - `language`: from production brief (e.g. en, pt, pt-br)
+       - Optionally call `list_models` first with `language_filter`; else omit `model_name` for default.
+     - **ElevenLabs:** For each scene i, call `text_to_speech` with that scene’s text and an output path that includes the scene number (e.g. **`{artifactBasePath}audio/scene-01.wav`**, … **scene-N.wav**).
+   - Report the list of saved paths (e.g. scene-01.wav … scene-N.wav). Do **not** generate a single `narration.wav` when generating per-scene; per-scene files are the source of truth for timing.
 
 7. **If MCP NOT authorized (user declined in the separate step) or voice type = human:**
    - Add **Manual Step** instructions (see below); do not generate TTS.
@@ -134,21 +144,17 @@ If any required input is missing, the agent MUST request it and **STOP** until p
 
 ## Manual Step (when MCP not authorized)
 
-If the user does not authorize ElevenLabs MCP or chooses human voice:
+If the user does not authorize TTS MCP or chooses human voice:
 
-**For AI voice (manual TTS):**
-1. Go to [ElevenLabs](https://elevenlabs.io/) or your preferred TTS service.
-2. Paste the voice-directed script text.
-3. Select voice: `{recommended voice based on brief}`.
-4. Set language: `{language}`.
-5. Export as MP3 (44.1kHz, 128kbps recommended).
-6. Save to: `projects/{currentProjectFolder}/audio/narration.mp3`.
+**For AI voice (manual TTS):** For correct image timing, generate **one WAV per scene** (scene-01.wav … scene-N.wav) so the Editor can use actual duration per scene. Split the script by `###` sections and run TTS per section.
+1. **Free option:** Use Coqui TTS locally: for each scene, save to **{artifactBasePath}audio/scene-01.wav**, scene-02.wav, … Or use the Coqui TTS MCP if configured (it will generate per-scene when authorized, using **output_path** with full path).
+2. **Paid option:** Go to [ElevenLabs](https://elevenlabs.io/) or another TTS service; paste each scene’s text, export as WAV/MP3, save as `scene-01.wav`, … in **{artifactBasePath}audio/**.
 
 **For human voice:**
 1. Use the voice-directed script for recording reference.
 2. Record in a quiet environment with consistent mic distance.
 3. Export as WAV or high-quality MP3.
-4. Save to: `projects/{currentProjectFolder}/audio/narration.mp3`.
+4. Save to: **{artifactBasePath}audio/narration.mp3**.
 
 ---
 
@@ -168,8 +174,13 @@ If not approved: ask how to improve, revise, re-submit, and repeat the approval 
 ## After Approval
 
 1. Summarize what was approved (1–3 bullets).
-2. **MCP TTS generation (separate step):** Only if voice type = AI. In a **new, separate message**, ask: *"Do you authorize me to generate the TTS narration via ElevenLabs MCP and save to projects/{currentProjectFolder}/audio/narration.mp3? Reply 'yes' or 'authorize' to generate; otherwise use the Manual Step in this agent. Ensure .cursor/mcp.json has your ElevenLabs API key."* Wait for the user's response.
-   - **If yes:** Call `search_voices` to list voices, present options, user selects; then run TTS generation (Process step 6), report the generated file path, then go to step 3 below.
+2. **MCP TTS generation (separate step):** Only if voice type = AI. In a **new, separate message**, present the MCP authorization gate in a **visually distinct block** so the user cannot miss that the framework is waiting for their reply:
+   - Start with a horizontal rule and this heading on its own line: **--- MCP AUTHORIZATION — WAITING FOR YOUR REPLY ---**
+   - On the next line, ask in **bold**: **Do you authorize me to generate the TTS narration and save to {artifactBasePath}audio/?** (I'll use Coqui TTS by default; reply **ElevenLabs** if you prefer and have credits.)
+   - Then: *Reply **yes** or **authorize** to generate; otherwise use the Manual Step.*
+   - **STOP and wait** for the user's response. Do not call any TTS MCP until they reply.
+  - **If yes (or Coqui):** Use **coqui-tts** MCP: split script by `###` into scenes, then for each scene call `text_to_speech` with that scene’s text, **`output_directory`** = **`{artifactBasePath}audio/`**, and **`scene_number`** = **1** for the first scene, **2** for the second, **3** for the third, and so on (the server saves scene-01.wav, scene-02.wav, … in that folder). Report the paths, then go to step 3 below.
+  - **If ElevenLabs:** Use **elevenlabs** MCP: call `search_voices`, present options, user selects; then split script by scene and call `text_to_speech` per scene with **output_path** = **{artifactBasePath}audio/scene-01.wav**, …; report the paths, then go to step 3 below.
    - **If no:** Remind about the Manual Step, then go to step 3 below.
 3. Tell the user they can run the next agent by **clicking or typing the command**: **/run-visual-director** (in chat, type `/` and select **run-visual-director**, or type `/run-visual-director`). Do not proceed to the next agent yourself; STOP and wait for the user to run the command.  
 4. **STOP.**

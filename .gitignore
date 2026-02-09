@@ -29,17 +29,26 @@ dark-method/.current-project
 # User project folders (contain user-specific video project data)
 projects/
 
+# Current video pointer (local to each environment)
+dark-method/.current-video
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Local Tools & Binaries
 # ─────────────────────────────────────────────────────────────────────────────
 
 # DaVinci Resolve MCP (local installation)
-davinci-resolve-mcp/
+tools/davinci-resolve-mcp/
 
 # YouTube Uploader MCP binary
 tools/youtube-uploader-mcp/*.exe
 tools/youtube-uploader-mcp/*.dmg
 tools/youtube-uploader-mcp/*.AppImage
+
+# Gemini Image Generator MCP
+tools/mcp-gemini-image-generator/mcp-server-gemini-image-generator/
+
+# Coqui TTS MCP
+tools/mcp-coqui-tts/
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IDE & OS
@@ -67,3 +76,4 @@ __pycache__/
 venv/
 .venv/
 tools/youtube-uploader-mcp/README.md
+tools/mcp-gemini-image-generator/README.md

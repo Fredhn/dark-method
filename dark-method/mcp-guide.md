@@ -54,17 +54,42 @@ Replace the path with your repo root. On Windows use forward slashes or escaped 
 
 **Purpose:** Generate narration audio from the voice-directed script so the user doesn’t have to record or run TTS manually.
 
+**Preferred option (no payment):** **Coqui TTS MCP** — local TTS via [Coqui TTS](https://github.com/coqui-ai/TTS). No API key or credits. Use when ElevenLabs credits are low or you prefer free TTS.
+
 **Options:**
 
 | MCP | Best for | Notes |
 |-----|----------|--------|
-| **ElevenLabs MCP** | High-quality TTS, many voices | Official; TTS, STT, voice cloning. Requires ElevenLabs API key. [GitHub](https://github.com/elevenlabs/elevenlabs-mcp) |
+| **Coqui TTS MCP** | **Preferred (free)** | Local TTS; no API key. Tools: `list_models`, `text_to_speech`. Output: WAV. This repo: **tools/mcp-coqui-tts/**. See **Coqui TTS setup** below. |
+| **ElevenLabs MCP** | High-quality TTS, many voices | Official; TTS, STT, voice cloning. Requires ElevenLabs API key and credits. [GitHub](https://github.com/elevenlabs/elevenlabs-mcp) |
 | **Hume MCP** | Expressive TTS, voice design | Octave TTS; acting instructions. Requires Hume API key. [Docs](https://dev.hume.ai/docs/text-to-speech-tts/mcp-server) |
 | **RealtimeTTS MCP** | Multiple engines (OpenAI, ElevenLabs, Azure, Coqui) | Python; `synthesize`, `stream`. Low latency. [PromptGenius](https://www.promptgenius.net/mcp/specialized-tools/text-to-speech) |
 | **tts-mcp (OpenAI)** | Simple OpenAI TTS | Uses OpenAI TTS API; multiple voices, formats. |
 | **Fish Audio MCP** | TTS, streaming, multiple voices | Fish Audio API. [GitHub](https://github.com/da-okazaki/mcp-fish-audio-server) |
 
-**Use in DARK-METHOD:** After Voice Director outputs the voice-directed script, the user (or the agent, if you allow tool use) can call the TTS MCP with the script text and chosen voice to generate `projects/{currentProject}/audio/narration.mp3` (or similar). Reduces “Manual Step: record or run TTS” to a single MCP call.
+**Use in DARK-METHOD:** Voice Director prefers **Coqui TTS** (free). After you approve the voice-directed script and authorize TTS, the agent calls Coqui TTS MCP with the script text and `output_directory: projects/{currentProject}/audio/`; output is `narration.wav`. If you prefer ElevenLabs and have credits, say so and the agent uses ElevenLabs instead.
+
+**Coqui TTS MCP — setup (free, no API key):**
+
+1. **Install:** From repo root: `cd tools/mcp-coqui-tts` then `uv sync` (or `pip install -e .`). Requires Python 3.9–3.11. First TTS run downloads a model (~hundreds of MB).
+2. **`.cursor/mcp.json`:** Add the Coqui TTS server. Example (replace path with your repo root):
+   ```json
+   "coqui-tts": {
+     "command": "uv",
+     "args": [
+       "run",
+       "--project",
+       "C:/Projetos/dark.channel.maker/tools/mcp-coqui-tts",
+       "mcp-coqui-tts"
+     ]
+   }
+   ```
+   If you use a venv: `"command": "<path-to>/tools/mcp-coqui-tts/.venv/Scripts/python.exe"`, `"args": ["-m", "mcp_coqui_tts.server"]`.
+3. **Restart Cursor** (or reload MCP). Voice Director will use Coqui TTS by default for narration.
+
+**Example (Coqui TTS):** "Generate TTS for the narration in `projects/my-video/script.md` and save to `projects/my-video/audio/`." Output: `narration.wav`.
+
+**Example (ElevenLabs):** Configure with your API key; then in chat: "Generate TTS for the narration in `projects/my-video/script.md` using voice X and save to `projects/my-video/audio/narration.mp3`."
 
 **Example (ElevenLabs):** Configure with your API key; then in chat: “Generate TTS for the narration in `projects/my-video/script.md` using voice X and save to `projects/my-video/audio/narration.mp3`.”
 
@@ -74,19 +99,78 @@ Replace the path with your repo root. On Windows use forward slashes or escaped 
 
 **Purpose:** Generate concept art, scene art, or thumbnail images from the visual blueprint or packaging concepts.
 
+**Centralized image output folder:** All image MCPs that write to disk (Stability AI, Gemini) **must use the same output folder** so you have one place to manage and so the agents can create it once before any call. Use **`projects/_mcp_images`** (absolute path in config, e.g. `C:/Projetos/dark.channel.maker/projects/_mcp_images`).
+
+- Set **Stability AI** `IMAGE_STORAGE_DIRECTORY` and **Gemini** `OUTPUT_IMAGE_PATH` to this same path.
+- **Agents create this folder once** at the start of image generation (before calling any image MCP), so the directory always exists and you avoid ENOENT errors and wasted tokens.
+- Replicate and Fal-AI return URLs; the agent downloads directly to the project folder, so they do not use `_mcp_images`.
+
+**Framework workflow (mandatory):** DARK-METHOD fixes the image-generation order. Agents (Visual Director, Packaging) **must** try **Stability AI MCP first** for every scene or thumbnail when authorized; only if the tool is unavailable or returns an error do they try the next. Order: **1. Stability AI** → **2. Gemini** → **3. Replicate** → **4. Fal-AI**. No reordering. See **dark-method/dark-method.system.md** (§ Image generation workflow) and the agent files for step-by-step flows.
+
+**Preferred option:** **Stability AI MCP** — high-quality image generation and manipulation (generate, edit, upscale, remove background) via [Stability AI](https://platform.stability.ai). Pay-as-you-go (~$0.03/image on Core). Use this first when configured.
+
 **Options:**
 
 | MCP | Best for | Notes |
 |-----|----------|--------|
+| **Stability AI MCP** | **Preferred** | Generate, edit, upscale, remove background. Tools: `generate-image`, `generate-image-sd35`, `remove-background`, `upscale-fast`, etc. [GitHub](https://github.com/tadasant/mcp-server-stability-ai). Requires API key at [platform.stability.ai](https://platform.stability.ai/account/keys). Set `IMAGE_STORAGE_DIRECTORY` to the **centralized folder** (see above). See **Stability AI setup** below. |
+| **Gemini Image Generator MCP** | **Free tier** | Text-to-image via Google Gemini 2.5 Flash Image. Free key at [Google AI Studio](https://aistudio.google.com/apikey). Tools: `generate_image_from_text`, `transform_image_from_file`. [GitHub](https://github.com/qhdrl12/mcp-server-gemini-image-generator). Set `OUTPUT_IMAGE_PATH` to the **same centralized folder**. See **Gemini setup** below. |
 | **DALL·E / Azure OpenAI DALL·E 3** | Thumbnails, concept art | Text-to-image; configurable size, quality. Requires OpenAI or Azure API key. |
-| **Replicate MCP** | FLUX, SD, many models (primary) | Run Replicate models (images, video). Pay-per-use; no subscription. [GitHub](https://github.com/deepfates/mcp-replicate). Configure `REPLICATE_API_TOKEN` in `.cursor/mcp.json` (placeholder: `YOUR_REPLICATE_API_TOKEN`). |
-| **Fal MCP** | FLUX, SD, MusicGen (fallback) | Images, video, music when Replicate fails or is unpaid. [GitHub](https://github.com/raveenb/fal-mcp-server). Configure `FAL_KEY` (placeholder: `YOUR_FAL_KEY`). |
-| **Image Generation MCP (Replicate Flux)** | Quick image gen | Replicate Flux model. |
+| **Replicate MCP (GongRzhe)** | FLUX Schnell (fallback) | Single tool: `generate_image`. Uses Replicate API (pay-per-use). [GitHub](https://github.com/GongRzhe/Image-Generation-MCP-Server). Configure `REPLICATE_API_TOKEN`. Returns URLs; agent downloads to project folder. |
+| **Fal MCP** | FLUX, SD (last fallback) | When Stability AI/Gemini/Replicate fail or require payment. [GitHub](https://github.com/raveenb/fal-mcp-server). Configure `FAL_KEY`. Returns URLs; agent saves to project folder. |
 | **Creatify MCP** | Video + TTS + avatars | Full video generation, not only images; see below. |
 
+**Stability AI MCP — setup (preferred):**
+
+1. **Install:** No clone needed. Run via `npx -y mcp-server-stability-ai`. Requires Node.js.
+2. **API key:** [Stability AI → Account Keys](https://platform.stability.ai/account/keys). Get an API key (25 free credits; then ~$0.01/credit).
+3. **`.cursor/mcp.json`:** Add the Stability AI server. Set `STABILITY_AI_API_KEY`. Set `IMAGE_STORAGE_DIRECTORY` to the **centralized image folder** (same as Gemini): e.g. `C:/Projetos/dark.channel.maker/projects/_mcp_images`. The Visual Director/Packaging agent creates this folder before the first image-MCP call so you avoid ENOENT and wasted tokens.
+   ```json
+   "stability-ai": {
+     "command": "npx",
+     "args": ["-y", "mcp-server-stability-ai"],
+     "env": {
+       "STABILITY_AI_API_KEY": "sk-...",
+       "IMAGE_STORAGE_DIRECTORY": "C:/Projetos/dark.channel.maker/projects/_mcp_images"
+     }
+   }
+   ```
+4. **Restart Cursor** (or reload MCP). Visual Director and Packaging use Stability AI first when configured.
+
+**Gemini Image Generator MCP — setup (free tier):**
+
+1. **Clone:** from repo root, `cd tools/mcp-gemini-image-generator` then `git clone https://github.com/qhdrl12/mcp-server-gemini-image-generator mcp-server-gemini-image-generator` (this creates the subfolder with the project).
+2. **Install:** run `uv sync` from the **subfolder** where `pyproject.toml` is: `cd tools/mcp-gemini-image-generator/mcp-server-gemini-image-generator` then `uv sync`. Install [uv](https://github.com/astral-sh/uv#installation) if needed.
+3. **API key (free):** [Google AI Studio → Create API Key](https://aistudio.google.com/apikey).
+4. **`.cursor/mcp.json`:** set `GEMINI_API_KEY` to your key. Set `OUTPUT_IMAGE_PATH` to the **same centralized folder** as Stability AI: e.g. `C:/Projetos/dark.channel.maker/projects/_mcp_images`. The `--directory` must point to the folder that contains `pyproject.toml` (e.g. `.../tools/mcp-gemini-image-generator/mcp-server-gemini-image-generator`). Agents create `projects/_mcp_images` before any image call.
+5. **Restart Cursor** (or reload MCP).
+
+**Replicate Try for Free (Replicate MCP):** Use the **Try for Free** collection so you can run models without purchasing credit first. In Replicate MCP: call `get_collection` with slug **`try-for-free`** to list free models, or use these directly:
+
+- **Image:** `google/imagen-4`, `black-forest-labs/flux-1.1-pro`, `black-forest-labs/flux-kontext-pro`, `ideogram-ai/ideogram-v3-turbo`, `black-forest-labs/flux-dev`
+- **Video:** `minimax/video-01`, `luma/reframe-video`, `topazlabs/video-upscale`
+- **Upscaling / restoration:** `topazlabs/image-upscale`, `szcho/codeformer`, `tencentarc/gfpgan`
+
+Free runs are limited per model; after the limit, add billing. See [Try for Free](https://replicate.com/collections/try-for-free).
+
+**Replicate and payment:** Replicate charges per prediction; there is no separate "free MCP". Both the previous generic Replicate MCP and the current **GongRzhe Image Generation MCP** use the same Replicate API and `REPLICATE_API_TOKEN`. If Replicate asks for payment, it is account/platform billing—switching MCP servers does not change that. The GongRzhe server simplifies the flow (one `generate_image` tool, default model `black-forest-labs/flux-schnell`) and returns image URLs; the agent downloads from those URLs to the project assets folder.
+
+**This repo: Replicate via GongRzhe Image Generation MCP (fallback).** The project uses [GongRzhe/Image-Generation-MCP-Server](https://github.com/GongRzhe/Image-Generation-MCP-Server) (run via npx). It exposes a single tool:
+- **`generate_image`** — prompt, optional seed, aspect_ratio, output_format, num_outputs; returns JSON with image URL(s). The Visual Director (or Packaging) then downloads each URL to `projects/{currentProject}/assets/scene-{N}.png` (e.g. via run command: `curl`, `Invoke-WebRequest`, etc.). Use when Stability AI and Gemini are not used.
+
+**.cursor/mcp.json** (Replicate, optional):
+```json
+"replicate": {
+  "command": "npx",
+  "args": ["-y", "@gongrzhe/image-gen-server"],
+  "env": { "REPLICATE_API_TOKEN": "..." }
+}
+```
+Optional env: `MODEL` (default `black-forest-labs/flux-schnell`). No local build required; restart Cursor (or reload MCP) after changing config.
+
 **Use in DARK-METHOD:**  
-- **Visual Director (Replicate primary, Fal fallback):** “Generate concept art for scene 1 from the description in `visuals.md`.”  
-- **Packaging:** “Generate a thumbnail image from the chosen concept in `packaging.md` (1280x720).”
+- **Visual Director (Stability AI preferred, then Gemini, then Replicate, then Fal):** Prefer **Stability AI MCP** when configured (high quality, pay-as-you-go). If Stability AI is unavailable or returns an error, use **Gemini Image Generator** (free tier); then Replicate; then Fal-AI. “Generate concept art for scene 1 from the description in `visuals.md`.”  
+- **Packaging:** Same order: Stability AI first, then Gemini, then Fal. “Generate a thumbnail image from the chosen concept in `packaging.md` (1280x720).”
 
 ---
 
@@ -100,12 +184,11 @@ Replace the path with your repo root. On Windows use forward slashes or escaped 
 |-----|----------|--------|
 | **Creatify MCP** | Avatar videos, TTS, URL-to-video, AI editing | 12 tools; avatar + TTS; 140+ voices. [GitHub](https://github.com/TSavo/creatify-mcp) |
 | **JSON2Video MCP** | Programmatic video from API | Generate video via json2video API. [GitHub](https://github.com/omergocmen/json2video-mcp-server) |
-| **DaVinci Resolve MCP** | Timeline editing in Resolve | If you edit in Resolve: project control, media, grading. [GitHub](https://github.com/samuelgursky/davinci-resolve-mcp) |
 | **Fal MCP** | AI video models | Fal.ai video models. |
 
 **Use in DARK-METHOD:**  
 - **Creatify:** Good for “faceless” avatar + TTS videos; Voice Director + Visual Director outputs can drive script and style; Packaging/Publishing stay separate.  
-- **DaVinci Resolve:** Editor agent can describe cuts; user or MCP can drive Resolve for timeline assembly (if you use Resolve).
+**Timeline assembly (Resolve):** Timeline assembly is **not** automated via MCP. The Editor agent generates **DaVinci Resolve–compatible Python scripts** (using the official Resolve scripting API) and writes them to a **per-video folder** under the Fusion Scripts Comp directory: **`C:\Users\frD\AppData\Roaming\Blackmagic Design\DaVinci Resolve\Support\Fusion\Scripts\Comp\{currentProjectFolder}\`** (e.g. `build_timeline.py`, `edit-instructions.json`). The user runs the script manually in DaVinci Resolve (free or Studio) to create the project, import media, and build the timeline. See **dark-method/agents/editor.agent.md**.
 
 ---
 
@@ -183,7 +266,7 @@ Add TTS, image, or YouTube servers as needed (see sections above). After configu
 
 ## Agent MCP authorization
 
-Agents that can use MCPs (Voice Director, Visual Director, Audio Engineer, Editor, Packaging, Publishing) **prompt for authorization in a separate step after you approve the artifact**:
+Agents that can use MCPs (Voice Director, Visual Director, Audio Engineer, Editor, Packaging, Publishing) **prompt for authorization in a separate step after you approve the artifact**. For **image generation** (Visual Director, Packaging), agents follow the framework workflow: **Stability AI first**, then Gemini, then Replicate (Visual Director only), then Fal-AI. See § Image generation above and dark-method.system.md § Image generation workflow.
 
 - First, the agent presents only the **approval gate** (Approve as-is / Approve with adjustments / Not approved). No MCP question is mixed with that prompt.
 - After you approve (e.g. Approve as-is), the agent asks in a **new, separate message** whether you authorize automatic execution of the MCP's activities (e.g. generate TTS, generate thumbnails, upload to YouTube).
@@ -198,7 +281,7 @@ This keeps the approval decision and the MCP authorization decision separate and
 - **One agent at a time:** MCPs are tools the agent (or user) can call during that agent’s step; they do not replace the agent or skip the approval gate.  
 - **Approval gate:** Automating a manual step (e.g. TTS, upload) still requires the user to approve the agent’s output before moving to the next agent. For agents that both produce an artifact and can automate via MCP (Visual Director, Voice Director, Audio Engineer, Editor, Packaging, Publishing), the approval gate is presented **alone** first; MCP authorization is a **separate step** after approval, so the user is not asked to approve and authorize in the same prompt.  
 - **Single artifact:** Each agent still produces one primary artifact; MCPs help create or fill it (e.g. write files, generate audio).  
-- **State awareness:** When using the filesystem MCP, the AI must respect `dark-method/.current-project` and write only under `projects/{currentProjectFolder}/`.
+- **State awareness:** When using the filesystem MCP, the AI must respect `dark-method/.current-project` and, for episode-level artifacts, the **artifact base path**: when `projects/{currentProjectFolder}/channel-brief.md` exists, read `dark-method/.current-video` and write under `projects/{currentProjectFolder}/{currentVideoFolder}/`; otherwise under `projects/{currentProjectFolder}/`.
 
 ---
 
